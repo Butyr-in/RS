@@ -846,7 +846,7 @@ if (dropZone) {
                 sessionItem.dataset.sessionIndex = index;
                 sessionItem.innerHTML = `
                         <div class="session-info">
-                            <span class="time">⏱ ${timeStart} — ${timeEnd}</span>
+                            <span class="time">⏱ ${sessionShortDate} ${timeStart} — ${timeEnd}</span>
                             <span class="pill avg-limit" data-copy="${sessionAvgLimitCopy}">NL${sessionAvgLimitDisplay}</span>
                             <span class="pill hands" data-copy="${session.length}">${session.length} рук</span>
                             <span class="pill duration" data-copy="${durationMinutes}">${durationMinutes} мин</span>
@@ -983,7 +983,7 @@ if (dropZone) {
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                    <td>${hand.startTime.substring(0, 5)}</td>
+                    <td>${hand.date} ${hand.startTime.substring(0, 5)}</td>
                     <td>${hand.limit}</td>
                     <td>${opponents || '-'}</td>
                     <td class="result ${resultClass}">${Stats.formatMoney(result, currency)}</td>
