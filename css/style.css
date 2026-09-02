@@ -18,6 +18,27 @@ body {
 }
 
 /* ===== Шапка ===== */
+.header-logo {
+    height: 36px;
+    width: 36px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-right: 10px;
+    vertical-align: middle;
+    background: var(--accent);
+    padding: 4px;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 480px) {
+    .header-logo {
+        height: 28px;
+        width: 28px;
+        margin-right: 6px;
+        padding: 3px;
+    }
+}
+
 .header {
     display: flex;
     justify-content: space-between;
