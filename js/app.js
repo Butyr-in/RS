@@ -879,17 +879,20 @@ if (dropZone) {
             }
 
             sessionItem.addEventListener('click', (e) => {
-                if (e.target.closest('.pill')) return;
+    if (e.target.closest('.pill')) return;
 
-                document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
-                sessionItem.classList.add('active');
+    // Убираем выделение со всех дней
+    document.querySelectorAll('.tree-day').forEach(el => el.classList.remove('selected'));
 
-                const sessionDateParts2 = firstHand.date.split('-');
-                const sessionShortDate2 = `${sessionDateParts2[2]}.${sessionDateParts2[1]}`;
-                this.showHands(session, `Сессия ${sessionShortDate2} ${timeStart}-${timeEnd}`);
-                this.selectedDay = day.date;
-                this.selectedSession = index;
-            });
+    document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
+    sessionItem.classList.add('active');
+
+    const sessionDateParts2 = firstHand.date.split('-');
+    const sessionShortDate2 = `${sessionDateParts2[2]}.${sessionDateParts2[1]}`;
+    this.showHands(session, `Сессия ${sessionShortDate2} ${timeStart}-${timeEnd}`);
+    this.selectedDay = day.date;
+    this.selectedSession = index;
+});
 
             sessionsDiv.appendChild(sessionItem);
         });
