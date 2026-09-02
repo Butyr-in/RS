@@ -20,30 +20,30 @@ const App = {
     folderHandle: null,
 
     async init() {
-        console.log('🚀 Инициализация Poker Analytics...');
+    console.log('🚀 Инициализация Poker Analytics...');
 
-        try {
-            await DB.open();
-            console.log('✅ База данных готова');
-        } catch (e) {
-            console.error('❌ Ошибка открытия БД:', e);
-            alert('Ошибка открытия базы данных. Проверьте консоль.');
-            return;
-        }
+    try {
+        await DB.open();
+        console.log('✅ База данных готова');
+    } catch (e) {
+        console.error('❌ Ошибка открытия БД:', e);
+        alert('Ошибка открытия базы данных. Проверьте консоль.');
+        return;
+    }
 
-        await this.loadData();
-        this.initUI();
-        Charts.init();
-        this.updateDashboard();
+    await this.loadData();
+    this.initUI();
+    Charts.init();
+    this.updateDashboard();
 
-        // ===== КОПИРАЙТ В ФУТЕРЕ =====
-const year = new Date().getFullYear();
-const el = document.getElementById('copyright');
-if (el) {
-    el.textContent = `© Butyrin ${year}`;
-    console.log('✅ Копирайт установлен:', el.textContent);
-} else {
-    console.warn('⚠️ Элемент #copyright не найден');
+    // ===== КОПИРАЙТ =====
+    const year = new Date().getFullYear();
+    const el = document.getElementById('copyright');
+    if (el) {
+        el.textContent = `© Butyrin ${year}`;
+    }
+
+    console.log('✅ Приложение готово');
 },
 
     async loadData() {
