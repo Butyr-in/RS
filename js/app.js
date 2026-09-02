@@ -698,180 +698,252 @@ if (dropZone) {
     },
 
     updateTree(hands) {
-        const container = document.getElementById('daysTree');
-        if (!container) return;
+    const container = document.getElementById('daysTree');
+    if (!container) return;
 
-        const dayGroups = this.groupHandsByDayAndSession(hands);
+    const dayGroups = this.groupHandsByDayAndSession(hands);
 
-        if (dayGroups.length === 0) {
-            container.innerHTML = '<p class="empty-message">Нет раздач</p>';
-            document.getElementById('totalDaysCount').textContent = '0 дней';
-            return;
+    if (dayGroups.length === 0) {
+        container.innerHTML = '<p class="empty-message">Нет раздач</p>';
+        document.getElementById('totalDaysCount').textContent = '0 дней';
+        return;
+    }
+
+    document.getElementById('totalDaysCount').textContent = `${dayGroups.length} дней`;
+    container.innerHTML = '';
+
+    const currency = this.getCurrency();
+
+    dayGroups.forEach((day) => {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'tree-day';
+
+        // --- Прибыль дня ---
+        const dayProfit = day.hands.reduce((sum, h) => {
+            const player = h.players.find(p => p.name === this.selectedPlayer);
+            return sum + (player ? player.result : 0);
+        }, 0);
+        const profitClass = dayProfit > 0 ? 'positive' : (dayProfit < 0 ? 'negative' : 'zero');
+
+        // --- Длительность дня ---
+        let dayDurationSeconds = 0;
+        day.sessions.forEach(session => {
+            if (session.length === 0) return;
+            const first = session[0];
+            const last = session[session.length - 1];
+            const startDt = new Date(`${first.date}T${first.startTime}`);
+            const endDt = new Date(`${last.date}T${last.startTime}`);
+            dayDurationSeconds += (endDt - startDt) / 1000;
+        });
+        const dayDurationMinutes = Math.round(dayDurationSeconds / 60);
+
+        // --- Средний лимит дня ---
+        let totalHands = 0;
+        let weightedLimit = 0;
+        day.hands.forEach(hand => {
+            const limitValue = parseInt(hand.limit.replace('NL', '')) || 0;
+            weightedLimit += limitValue;
+            totalHands++;
+        });
+        const avgLimit = totalHands > 0 ? (weightedLimit / totalHands) : 0;
+        const avgLimitDisplay = Math.round(avgLimit);
+        const avgLimitCopy = avgLimit.toFixed(2);
+
+        // --- Период дня ---
+        const allDates = new Set();
+        day.hands.forEach(hand => {
+            allDates.add(hand.date);
+        });
+        const sortedDates = [...allDates].sort();
+        const startDate = sortedDates[0];
+        const endDate = sortedDates[sortedDates.length - 1];
+
+        const startParts = startDate.split('-');
+        const endParts = endDate.split('-');
+        const startDisplay = `${startParts[2]}.${startParts[1]}.${startParts[0]}`;
+        const endDisplay = `${endParts[2]}.${endParts[1]}.${endParts[0]}`;
+        const dateRange = startDate === endDate ? startDisplay : `${startDisplay} - ${endDisplay}`;
+
+        // --- Заголовок дня ---
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'tree-day-header';
+        dayHeader.dataset.date = day.date;
+        dayHeader.innerHTML = `
+            <div class="day-info">
+                <span class="date">📅 ${dateRange}</span>
+                <span class="pill avg-limit" data-copy="${avgLimitCopy}">NL${avgLimitDisplay}</span>
+                <span class="pill hands" data-copy="${day.hands.length}">${day.hands.length} рук</span>
+                <span class="pill duration" data-copy="${dayDurationMinutes}">${dayDurationMinutes} мин</span>
+                <span class="profit ${profitClass}">${Stats.formatMoney(dayProfit, currency)}</span>
+            </div>
+            <span class="toggle-icon">▶</span>
+        `;
+
+        // --- Клик по пилюлям дня ---
+        const dayAvgPill = dayHeader.querySelector('.pill.avg-limit');
+        if (dayAvgPill) {
+            dayAvgPill.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.copyToClipboard(dayAvgPill.dataset.copy, dayAvgPill);
+            });
+        }
+        const dayHandsPill = dayHeader.querySelector('.pill.hands');
+        if (dayHandsPill) {
+            dayHandsPill.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.copyToClipboard(dayHandsPill.dataset.copy, dayHandsPill);
+            });
+        }
+        const dayDurationPill = dayHeader.querySelector('.pill.duration');
+        if (dayDurationPill) {
+            dayDurationPill.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.copyToClipboard(dayDurationPill.dataset.copy, dayDurationPill);
+            });
         }
 
-        document.getElementById('totalDaysCount').textContent = `${dayGroups.length} дней`;
-        container.innerHTML = '';
+        // --- Сессии ---
+        const sessionsDiv = document.createElement('div');
+        sessionsDiv.className = 'tree-sessions';
 
-        const currency = this.getCurrency();
+        day.sessions.forEach((session, index) => {
+            if (session.length === 0) return;
 
-        dayGroups.forEach((day) => {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'tree-day';
-
-            // --- Прибыль дня ---
-            const dayProfit = day.hands.reduce((sum, h) => {
+            const sessionProfit = session.reduce((sum, h) => {
                 const player = h.players.find(p => p.name === this.selectedPlayer);
                 return sum + (player ? player.result : 0);
             }, 0);
-            const profitClass = dayProfit > 0 ? 'positive' : (dayProfit < 0 ? 'negative' : 'zero');
+            const sProfitClass = sessionProfit > 0 ? 'positive' : (sessionProfit < 0 ? 'negative' : 'zero');
 
-            // --- Длительность дня ---
-            let dayDurationSeconds = 0;
-            day.sessions.forEach((session, index) => {
-    if (session.length === 0) return;
+            const firstHand = session[0];
+            const lastHand = session[session.length - 1];
+            const timeStart = firstHand.startTime.substring(0, 5);
+            const timeEnd = lastHand.startTime.substring(0, 5);
 
-    // Прибыль сессии
-    const sessionProfit = session.reduce((sum, h) => {
-        const player = h.players.find(p => p.name === this.selectedPlayer);
-        return sum + (player ? player.result : 0);
-    }, 0);
-    const sProfitClass = sessionProfit > 0 ? 'positive' : (sessionProfit < 0 ? 'negative' : 'zero');
+            const startDt = new Date(`${firstHand.date}T${firstHand.startTime}`);
+            const endDt = new Date(`${lastHand.date}T${lastHand.startTime}`);
+            const durationMinutes = Math.round((endDt - startDt) / 60000);
 
-    // Время начала и конца
-    const firstHand = session[0];
-    const lastHand = session[session.length - 1];
-    const timeStart = firstHand.startTime.substring(0, 5);
-    const timeEnd = lastHand.startTime.substring(0, 5);
+            // ДАТА ДЛЯ СЕССИИ
+            const sessionDateParts = firstHand.date.split('-');
+            const sessionShortDate = `${sessionDateParts[2]}.${sessionDateParts[1]}`;
 
-    // Длительность сессии
-    const startDt = new Date(`${firstHand.date}T${firstHand.startTime}`);
-    const endDt = new Date(`${lastHand.date}T${lastHand.startTime}`);
-    const durationMinutes = Math.round((endDt - startDt) / 60000);
+            let sessionTotalHands = 0;
+            let sessionWeightedLimit = 0;
+            session.forEach(hand => {
+                const limitValue = parseInt(hand.limit.replace('NL', '')) || 0;
+                sessionWeightedLimit += limitValue;
+                sessionTotalHands++;
+            });
+            const sessionAvgLimit = sessionTotalHands > 0 ? (sessionWeightedLimit / sessionTotalHands) : 0;
+            const sessionAvgLimitDisplay = Math.round(sessionAvgLimit);
+            const sessionAvgLimitCopy = sessionAvgLimit.toFixed(2);
 
-    // ДАТА ДЛЯ СЕССИИ
-    const sessionDateParts = firstHand.date.split('-');
-    const sessionShortDate = `${sessionDateParts[2]}.${sessionDateParts[1]}`;
+            const sessionItem = document.createElement('div');
+            sessionItem.className = 'tree-session';
+            sessionItem.dataset.day = day.date;
+            sessionItem.dataset.sessionIndex = index;
+            sessionItem.innerHTML = `
+                <div class="session-info">
+                    <span class="time">⏱ ${sessionShortDate} ${timeStart} — ${timeEnd}</span>
+                    <span class="pill avg-limit" data-copy="${sessionAvgLimitCopy}">NL${sessionAvgLimitDisplay}</span>
+                    <span class="pill hands" data-copy="${session.length}">${session.length}</span>
+                    <span class="pill duration" data-copy="${durationMinutes}">${durationMinutes} мин</span>
+                    <span class="profit ${sProfitClass}">${Stats.formatMoney(sessionProfit, currency)}</span>
+                </div>
+            `;
 
-    // Средний лимит сессии
-    let sessionTotalHands = 0;
-    let sessionWeightedLimit = 0;
-    session.forEach(hand => {
-        const limitValue = parseInt(hand.limit.replace('NL', '')) || 0;
-        sessionWeightedLimit += limitValue;
-        sessionTotalHands++;
-    });
-    const sessionAvgLimit = sessionTotalHands > 0 ? (sessionWeightedLimit / sessionTotalHands) : 0;
-    const sessionAvgLimitDisplay = Math.round(sessionAvgLimit);
-    const sessionAvgLimitCopy = sessionAvgLimit.toFixed(2);
+            const sAvgPill = sessionItem.querySelector('.pill.avg-limit');
+            if (sAvgPill) {
+                sAvgPill.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.copyToClipboard(sAvgPill.dataset.copy, sAvgPill);
+                });
+            }
+            const sHandsPill = sessionItem.querySelector('.pill.hands');
+            if (sHandsPill) {
+                sHandsPill.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.copyToClipboard(sHandsPill.dataset.copy, sHandsPill);
+                });
+            }
+            const sDurationPill = sessionItem.querySelector('.pill.duration');
+            if (sDurationPill) {
+                sDurationPill.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.copyToClipboard(sDurationPill.dataset.copy, sDurationPill);
+                });
+            }
 
-    // Элемент сессии
-    const sessionItem = document.createElement('div');
-    sessionItem.className = 'tree-session';
-    sessionItem.dataset.day = day.date;
-    sessionItem.dataset.sessionIndex = index;
-    sessionItem.innerHTML = `
-        <div class="session-info">
-            <span class="time">⏱ ${sessionShortDate} ${timeStart} — ${timeEnd}</span>
-            <span class="pill avg-limit" data-copy="${sessionAvgLimitCopy}">NL${sessionAvgLimitDisplay}</span>
-            <span class="pill hands" data-copy="${session.length}">${session.length}</span>
-            <span class="pill duration" data-copy="${durationMinutes}">${durationMinutes} мин</span>
-            <span class="profit ${sProfitClass}">${Stats.formatMoney(sessionProfit, currency)}</span>
-        </div>
-    `;
-
-    // Клик по пилюлям сессии
-    const sAvgPill = sessionItem.querySelector('.pill.avg-limit');
-    if (sAvgPill) {
-        sAvgPill.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.copyToClipboard(sAvgPill.dataset.copy, sAvgPill);
-        });
-    }
-    const sHandsPill = sessionItem.querySelector('.pill.hands');
-    if (sHandsPill) {
-        sHandsPill.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.copyToClipboard(sHandsPill.dataset.copy, sHandsPill);
-        });
-    }
-    const sDurationPill = sessionItem.querySelector('.pill.duration');
-    if (sDurationPill) {
-        sDurationPill.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.copyToClipboard(sDurationPill.dataset.copy, sDurationPill);
-        });
-    }
-
-    // Клик по сессии — показываем раздачи
-    sessionItem.addEventListener('click', (e) => {
-        if (e.target.closest('.pill')) return;
-
-        document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
-        sessionItem.classList.add('active');
-
-        const sessionDateParts2 = firstHand.date.split('-');
-        const sessionShortDate2 = `${sessionDateParts2[2]}.${sessionDateParts2[1]}`;
-        this.showHands(session, `Сессия ${sessionShortDate2} ${timeStart}-${timeEnd}`);
-        this.selectedDay = day.date;
-        this.selectedSession = index;
-    });
-
-    sessionsDiv.appendChild(sessionItem);
-});
-
-            // Клик по дню — раскрытие сессий
-            dayHeader.addEventListener('click', (e) => {
+            sessionItem.addEventListener('click', (e) => {
                 if (e.target.closest('.pill')) return;
 
-                const isOpen = sessionsDiv.classList.contains('open');
+                document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
+                sessionItem.classList.add('active');
 
-                document.querySelectorAll('.tree-sessions').forEach(el => {
-                    if (el !== sessionsDiv) {
-                        el.classList.remove('open');
-                        el.parentElement.querySelector('.toggle-icon')?.classList.remove('open');
-                    }
-                });
-
-                if (isOpen) {
-                    sessionsDiv.classList.remove('open');
-                    dayHeader.querySelector('.toggle-icon').classList.remove('open');
-                    this.showHands(day.hands, `Все раздачи ${dateRange}`);
-                } else {
-                    sessionsDiv.classList.add('open');
-                    dayHeader.querySelector('.toggle-icon').classList.add('open');
-                    document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
-                    this.showHands(day.hands, `Все раздачи ${dateRange}`);
-                    this.selectedDay = day.date;
-                    this.selectedSession = null;
-                }
+                const sessionDateParts2 = firstHand.date.split('-');
+                const sessionShortDate2 = `${sessionDateParts2[2]}.${sessionDateParts2[1]}`;
+                this.showHands(session, `Сессия ${sessionShortDate2} ${timeStart}-${timeEnd}`);
+                this.selectedDay = day.date;
+                this.selectedSession = index;
             });
 
-            dayDiv.appendChild(dayHeader);
-            dayDiv.appendChild(sessionsDiv);
-            container.appendChild(dayDiv);
+            sessionsDiv.appendChild(sessionItem);
         });
 
-        // Восстанавливаем выбранный день/сессию
-        if (this.selectedDay) {
-            const dayHeaders = container.querySelectorAll('.tree-day-header');
-            dayHeaders.forEach((header) => {
-                if (header.dataset.date === this.selectedDay) {
-                    header.click();
-                    if (this.selectedSession !== null) {
-                        const sessions = header.parentElement.querySelectorAll('.tree-session');
-                        if (sessions[this.selectedSession]) {
-                            sessions[this.selectedSession].click();
-                        }
-                    }
+        // --- Клик по дню ---
+        dayHeader.addEventListener('click', (e) => {
+            if (e.target.closest('.pill')) return;
+
+            const isOpen = sessionsDiv.classList.contains('open');
+
+            document.querySelectorAll('.tree-sessions').forEach(el => {
+                if (el !== sessionsDiv) {
+                    el.classList.remove('open');
+                    el.parentElement.querySelector('.toggle-icon')?.classList.remove('open');
                 }
             });
-        } else {
-            const firstDay = container.querySelector('.tree-day-header');
-            if (firstDay) {
-                firstDay.click();
+
+            if (isOpen) {
+                sessionsDiv.classList.remove('open');
+                dayHeader.querySelector('.toggle-icon').classList.remove('open');
+                this.showHands(day.hands, `Все раздачи ${dateRange}`);
+            } else {
+                sessionsDiv.classList.add('open');
+                dayHeader.querySelector('.toggle-icon').classList.add('open');
+                document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
+                this.showHands(day.hands, `Все раздачи ${dateRange}`);
+                this.selectedDay = day.date;
+                this.selectedSession = null;
             }
+        });
+
+        dayDiv.appendChild(dayHeader);
+        dayDiv.appendChild(sessionsDiv);
+        container.appendChild(dayDiv);
+    });
+
+    // Восстанавливаем выбранный день/сессию
+    if (this.selectedDay) {
+        const dayHeaders = container.querySelectorAll('.tree-day-header');
+        dayHeaders.forEach((header) => {
+            if (header.dataset.date === this.selectedDay) {
+                header.click();
+                if (this.selectedSession !== null) {
+                    const sessions = header.parentElement.querySelectorAll('.tree-session');
+                    if (sessions[this.selectedSession]) {
+                        sessions[this.selectedSession].click();
+                    }
+                }
+            }
+        });
+    } else {
+        const firstDay = container.querySelector('.tree-day-header');
+        if (firstDay) {
+            firstDay.click();
         }
-    },
+    }
+},
 
     showHands(hands, title) {
     const tbody = document.getElementById('handsBody');
