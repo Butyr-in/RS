@@ -912,6 +912,17 @@ body {
     opacity: 0.6;
 }
 
+.copyright-group a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.copyright-group a:hover {
+    opacity: 1;
+    color: var(--accent);
+}
+
 /* ===== Адаптивность ===== */
 @media (max-width: 1024px) {
     .cards-grid {
