@@ -949,53 +949,57 @@ if (dropZone) {
     },
 
     showHands(hands, title) {
-        const tbody = document.getElementById('handsBody');
-        const titleSpan = document.getElementById('handsPanelTitle');
-        const countSpan = document.getElementById('handsCount');
+    const tbody = document.getElementById('handsBody');
+    const titleSpan = document.getElementById('handsPanelTitle');
+    const countSpan = document.getElementById('handsCount');
 
-        if (!tbody) return;
+    if (!tbody) return;
 
-        titleSpan.textContent = `📋 ${title}`;
-        countSpan.textContent = `${hands.length} раздач`;
+    titleSpan.textContent = `📋 ${title}`;
+    countSpan.textContent = `${hands.length} раздач`;
 
-        if (hands.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="empty-message">Нет раздач</td></tr>';
-            return;
-        }
+    if (hands.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-message">Нет раздач</td></tr>';
+        return;
+    }
 
-        const currency = this.getCurrency();
+    const currency = this.getCurrency();
 
-        const sorted = [...hands].sort((a, b) => {
-            return b.startTime.localeCompare(a.startTime);
-        });
+    const sorted = [...hands].sort((a, b) => {
+        return b.startTime.localeCompare(a.startTime);
+    });
 
-        tbody.innerHTML = '';
-        sorted.forEach(hand => {
-            const player = hand.players.find(p => p.name === this.selectedPlayer);
-            const result = player ? player.result : 0;
+    tbody.innerHTML = '';
+    sorted.forEach(hand => {
+        const player = hand.players.find(p => p.name === this.selectedPlayer);
+        const result = player ? player.result : 0;
 
-            const opponents = hand.players
-                .filter(p => p.name !== this.selectedPlayer)
-                .map(p => p.name)
-                .join(', ');
+        const opponents = hand.players
+            .filter(p => p.name !== this.selectedPlayer)
+            .map(p => p.name)
+            .join(', ');
 
-            const resultClass = result > 0 ? 'positive' : (result < 0 ? 'negative' : 'zero');
+        const resultClass = result > 0 ? 'positive' : (result < 0 ? 'negative' : 'zero');
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                    <td>${hand.date} ${hand.startTime.substring(0, 5)}</td>
-                    <td>${hand.limit}</td>
-                    <td>${opponents || '-'}</td>
-                    <td class="result ${resultClass}">${Stats.formatMoney(result, currency)}</td>
-                `;
-            tbody.appendChild(tr);
-        });
+        // ===== ДАТА ДЛЯ РАЗДАЧИ =====
+        const dateParts = hand.date.split('-');
+        const shortDate = `${dateParts[2]}.${dateParts[1]}`; // 02.09
 
-        const wrapper = tbody.closest('.table-wrapper');
-        if (wrapper) {
-            wrapper.scrollTop = 0;
-        }
-    },
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${shortDate} ${hand.startTime.substring(0, 5)}</td>
+            <td>${hand.limit}</td>
+            <td>${opponents || '-'}</td>
+            <td class="result ${resultClass}">${Stats.formatMoney(result, currency)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    const wrapper = tbody.closest('.table-wrapper');
+    if (wrapper) {
+        wrapper.scrollTop = 0;
+    }
+},
 
     showEmptyState(message = 'Нет данных') {
         const currency = this.getCurrency();
