@@ -727,172 +727,97 @@ if (dropZone) {
 
             // --- Длительность дня ---
             let dayDurationSeconds = 0;
-            day.sessions.forEach(session => {
-                if (session.length === 0) return;
-                const first = session[0];
-                const last = session[session.length - 1];
-                const startDt = new Date(`${first.date}T${first.startTime}`);
-                const endDt = new Date(`${last.date}T${last.startTime}`);
-                dayDurationSeconds += (endDt - startDt) / 1000;
-            });
-            const dayDurationMinutes = Math.round(dayDurationSeconds / 60);
-
-            // --- Средний лимит дня ---
-            let totalHands = 0;
-            let weightedLimit = 0;
-            day.hands.forEach(hand => {
-                const limitValue = parseInt(hand.limit.replace('NL', '')) || 0;
-                weightedLimit += limitValue;
-                totalHands++;
-            });
-            const avgLimit = totalHands > 0 ? (weightedLimit / totalHands) : 0;
-            const avgLimitDisplay = Math.round(avgLimit);
-            const avgLimitCopy = avgLimit.toFixed(2);
-
-            // --- Период дня ---
-            const allDates = new Set();
-            day.hands.forEach(hand => {
-                allDates.add(hand.date);
-            });
-            const sortedDates = [...allDates].sort();
-            const startDate = sortedDates[0];
-            const endDate = sortedDates[sortedDates.length - 1];
-
-            const startParts = startDate.split('-');
-            const endParts = endDate.split('-');
-            const startDisplay = `${startParts[2]}.${startParts[1]}.${startParts[0]}`;
-            const endDisplay = `${endParts[2]}.${endParts[1]}.${endParts[0]}`;
-            const dateRange = startDate === endDate ? startDisplay : `${startDisplay} - ${endDisplay}`;
-
-            // --- Заголовок дня ---
-            const dayHeader = document.createElement('div');
-            dayHeader.className = 'tree-day-header';
-            dayHeader.dataset.date = day.date;
-            dayHeader.innerHTML = `
-                    <div class="day-info">
-                        <span class="date">📅 ${dateRange}</span>
-                        <span class="pill avg-limit" data-copy="${avgLimitCopy}">NL${avgLimitDisplay}</span>
-                        <span class="pill hands" data-copy="${day.hands.length}">${day.hands.length} рук</span>
-                        <span class="pill duration" data-copy="${dayDurationMinutes}">${dayDurationMinutes} мин</span>
-                        <span class="profit ${profitClass}">${Stats.formatMoney(dayProfit, currency)}</span>
-                    </div>
-                    <span class="toggle-icon">▶</span>
-                `;
-
-            // --- Клик по пилюлям дня ---
-            const dayAvgPill = dayHeader.querySelector('.pill.avg-limit');
-            if (dayAvgPill) {
-                dayAvgPill.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.copyToClipboard(dayAvgPill.dataset.copy, dayAvgPill);
-                });
-            }
-            const dayHandsPill = dayHeader.querySelector('.pill.hands');
-            if (dayHandsPill) {
-                dayHandsPill.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.copyToClipboard(dayHandsPill.dataset.copy, dayHandsPill);
-                });
-            }
-            const dayDurationPill = dayHeader.querySelector('.pill.duration');
-            if (dayDurationPill) {
-                dayDurationPill.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.copyToClipboard(dayDurationPill.dataset.copy, dayDurationPill);
-                });
-            }
-
-            // --- Сессии ---
-            const sessionsDiv = document.createElement('div');
-            sessionsDiv.className = 'tree-sessions';
-
             day.sessions.forEach((session, index) => {
-                if (session.length === 0) return;
+    if (session.length === 0) return;
 
-                // Прибыль сессии
-                const sessionProfit = session.reduce((sum, h) => {
-                    const player = h.players.find(p => p.name === this.selectedPlayer);
-                    return sum + (player ? player.result : 0);
-                }, 0);
-                const sProfitClass = sessionProfit > 0 ? 'positive' : (sessionProfit < 0 ? 'negative' : 'zero');
+    // Прибыль сессии
+    const sessionProfit = session.reduce((sum, h) => {
+        const player = h.players.find(p => p.name === this.selectedPlayer);
+        return sum + (player ? player.result : 0);
+    }, 0);
+    const sProfitClass = sessionProfit > 0 ? 'positive' : (sessionProfit < 0 ? 'negative' : 'zero');
 
-                // Время начала и конца
-                const firstHand = session[0];
-                const lastHand = session[session.length - 1];
-                const timeStart = firstHand.startTime.substring(0, 5);
-                const timeEnd = lastHand.startTime.substring(0, 5);
+    // Время начала и конца
+    const firstHand = session[0];
+    const lastHand = session[session.length - 1];
+    const timeStart = firstHand.startTime.substring(0, 5);
+    const timeEnd = lastHand.startTime.substring(0, 5);
 
-                // Длительность сессии
-                const startDt = new Date(`${firstHand.date}T${firstHand.startTime}`);
-                const endDt = new Date(`${lastHand.date}T${lastHand.startTime}`);
-                const durationMinutes = Math.round((endDt - startDt) / 60000);
+    // Длительность сессии
+    const startDt = new Date(`${firstHand.date}T${firstHand.startTime}`);
+    const endDt = new Date(`${lastHand.date}T${lastHand.startTime}`);
+    const durationMinutes = Math.round((endDt - startDt) / 60000);
 
-                // --- Средний лимит сессии ---
-                let sessionTotalHands = 0;
-                let sessionWeightedLimit = 0;
-                session.forEach(hand => {
-                    const limitValue = parseInt(hand.limit.replace('NL', '')) || 0;
-                    sessionWeightedLimit += limitValue;
-                    sessionTotalHands++;
-                });
-                const sessionAvgLimit = sessionTotalHands > 0 ? (sessionWeightedLimit / sessionTotalHands) : 0;
-                const sessionAvgLimitDisplay = Math.round(sessionAvgLimit);
-                const sessionAvgLimitCopy = sessionAvgLimit.toFixed(2);
+    // ДАТА ДЛЯ СЕССИИ
+    const sessionDateParts = firstHand.date.split('-');
+    const sessionShortDate = `${sessionDateParts[2]}.${sessionDateParts[1]}`;
 
-                // --- Элемент сессии ---
-                const sessionItem = document.createElement('div');
-                sessionItem.className = 'tree-session';
-                sessionItem.dataset.day = day.date;
-                sessionItem.dataset.sessionIndex = index;
-                sessionItem.innerHTML = `
-                        <div class="session-info">
-                            <span class="time">⏱ ${sessionShortDate} ${timeStart} — ${timeEnd}</span>
-                            <span class="pill avg-limit" data-copy="${sessionAvgLimitCopy}">NL${sessionAvgLimitDisplay}</span>
-                            <span class="pill hands" data-copy="${session.length}">${session.length} рук</span>
-                            <span class="pill duration" data-copy="${durationMinutes}">${durationMinutes} мин</span>
-                            <span class="profit ${sProfitClass}">${Stats.formatMoney(sessionProfit, currency)}</span>
-                        </div>
-                    `;
+    // Средний лимит сессии
+    let sessionTotalHands = 0;
+    let sessionWeightedLimit = 0;
+    session.forEach(hand => {
+        const limitValue = parseInt(hand.limit.replace('NL', '')) || 0;
+        sessionWeightedLimit += limitValue;
+        sessionTotalHands++;
+    });
+    const sessionAvgLimit = sessionTotalHands > 0 ? (sessionWeightedLimit / sessionTotalHands) : 0;
+    const sessionAvgLimitDisplay = Math.round(sessionAvgLimit);
+    const sessionAvgLimitCopy = sessionAvgLimit.toFixed(2);
 
-                // --- Клик по пилюлям сессии ---
-                const sAvgPill = sessionItem.querySelector('.pill.avg-limit');
-                if (sAvgPill) {
-                    sAvgPill.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.copyToClipboard(sAvgPill.dataset.copy, sAvgPill);
-                    });
-                }
-                const sHandsPill = sessionItem.querySelector('.pill.hands');
-                if (sHandsPill) {
-                    sHandsPill.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.copyToClipboard(sHandsPill.dataset.copy, sHandsPill);
-                    });
-                }
-                const sDurationPill = sessionItem.querySelector('.pill.duration');
-                if (sDurationPill) {
-                    sDurationPill.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.copyToClipboard(sDurationPill.dataset.copy, sDurationPill);
-                    });
-                }
+    // Элемент сессии
+    const sessionItem = document.createElement('div');
+    sessionItem.className = 'tree-session';
+    sessionItem.dataset.day = day.date;
+    sessionItem.dataset.sessionIndex = index;
+    sessionItem.innerHTML = `
+        <div class="session-info">
+            <span class="time">⏱ ${sessionShortDate} ${timeStart} — ${timeEnd}</span>
+            <span class="pill avg-limit" data-copy="${sessionAvgLimitCopy}">NL${sessionAvgLimitDisplay}</span>
+            <span class="pill hands" data-copy="${session.length}">${session.length}</span>
+            <span class="pill duration" data-copy="${durationMinutes}">${durationMinutes} мин</span>
+            <span class="profit ${sProfitClass}">${Stats.formatMoney(sessionProfit, currency)}</span>
+        </div>
+    `;
 
-                // Клик по сессии — показываем раздачи
-                sessionItem.addEventListener('click', (e) => {
-                    if (e.target.closest('.pill')) return;
+    // Клик по пилюлям сессии
+    const sAvgPill = sessionItem.querySelector('.pill.avg-limit');
+    if (sAvgPill) {
+        sAvgPill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.copyToClipboard(sAvgPill.dataset.copy, sAvgPill);
+        });
+    }
+    const sHandsPill = sessionItem.querySelector('.pill.hands');
+    if (sHandsPill) {
+        sHandsPill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.copyToClipboard(sHandsPill.dataset.copy, sHandsPill);
+        });
+    }
+    const sDurationPill = sessionItem.querySelector('.pill.duration');
+    if (sDurationPill) {
+        sDurationPill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.copyToClipboard(sDurationPill.dataset.copy, sDurationPill);
+        });
+    }
 
-                    document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
-                    sessionItem.classList.add('active');
+    // Клик по сессии — показываем раздачи
+    sessionItem.addEventListener('click', (e) => {
+        if (e.target.closest('.pill')) return;
 
-                    const sessionDateParts = firstHand.date.split('-');
-                    const sessionShortDate = `${sessionDateParts[2]}.${sessionDateParts[1]}`;
-                    this.showHands(session, `Сессия ${timeStart}-${timeEnd} (${sessionShortDate})`);
-                    this.selectedDay = day.date;
-                    this.selectedSession = index;
-                });
+        document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
+        sessionItem.classList.add('active');
 
-                sessionsDiv.appendChild(sessionItem);
-            });
+        const sessionDateParts2 = firstHand.date.split('-');
+        const sessionShortDate2 = `${sessionDateParts2[2]}.${sessionDateParts2[1]}`;
+        this.showHands(session, `Сессия ${sessionShortDate2} ${timeStart}-${timeEnd}`);
+        this.selectedDay = day.date;
+        this.selectedSession = index;
+    });
+
+    sessionsDiv.appendChild(sessionItem);
+});
 
             // Клик по дню — раскрытие сессий
             dayHeader.addEventListener('click', (e) => {
