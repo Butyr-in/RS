@@ -78,19 +78,22 @@ if (el) {
         this.loadSettings();
     },
 
-    loadSettings() {
-        const dayStart = localStorage.getItem('dayStart');
-        const sessionGap = localStorage.getItem('sessionGap');
+   loadSettings() {
+    const dayStart = localStorage.getItem('dayStart');
+    const sessionGap = localStorage.getItem('sessionGap');
 
-        if (dayStart) {
-            document.getElementById('dayStart').value = dayStart;
-            this.dayStart = dayStart;
+    if (dayStart) {
+        document.getElementById('dayStart').value = dayStart;
+        this.dayStart = dayStart;
+    }
+    if (sessionGap) {
+        const gapInput = document.getElementById('sessionGap');
+        if (gapInput) {
+            gapInput.value = sessionGap;
         }
-        if (sessionGap) {
-            document.getElementById('sessionGap').value = sessionGap;
-            this.sessionGap = parseInt(sessionGap);
-        }
-    },
+        this.sessionGap = parseInt(sessionGap);
+    }
+},
 
     saveSettings() {
         localStorage.setItem('dayStart', this.dayStart);
