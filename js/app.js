@@ -37,14 +37,14 @@ const App = {
         this.updateDashboard();
 
         // ===== КОПИРАЙТ В ФУТЕРЕ =====
-    const year = new Date().getFullYear();
-    const el = document.getElementById('copyright');
-    if (el) {
-        el.textContent = `© Butyrin ${year}`;
-    }
-
-    console.log('✅ Приложение готово');
-    },
+const year = new Date().getFullYear();
+const el = document.getElementById('copyright');
+if (el) {
+    el.textContent = `© Butyrin ${year}`;
+    console.log('✅ Копирайт установлен:', el.textContent);
+} else {
+    console.warn('⚠️ Элемент #copyright не найден');
+},
 
     async loadData() {
         try {
