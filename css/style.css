@@ -1040,22 +1040,4 @@ body {
         padding: 1px 6px;
     }
 
-    /* ===== Футер ===== */
-.footer {
-    text-align: center;
-    padding: 20px 0 10px 0;
-    font-size: 12px;
-    color: var(--text-muted);
-    opacity: 0.6;
-    border-top: 1px solid var(--border-color);
-    margin-top: 20px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.footer span {
-    display: inline-block;
-}
 }
