@@ -18,24 +18,6 @@ body {
 }
 
 /* ===== Шапка ===== */
-.header-logo {
-    height: 36px;
-    width: 36px;
-    object-fit: contain;
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-/* Адаптация для мобильных */
-@media (max-width: 480px) {
-    .header-logo {
-        height: 28px;
-        width: 28px;
-        margin-right: 6px;
-        padding: 3px;
-    }
-}
-
 .header {
     display: flex;
     justify-content: space-between;
@@ -56,6 +38,14 @@ body {
 .header-left h1 {
     font-size: 24px;
     font-weight: 700;
+}
+
+.header-logo {
+    height: 36px;
+    width: 36px;
+    object-fit: contain;
+    margin-right: 10px;
+    vertical-align: middle;
 }
 
 .version {
@@ -472,7 +462,75 @@ body {
     color: var(--text-muted);
 }
 
-/* ===== День в левой панели ===== */
+/* ===== ОБЩИЕ КОЛОНКИ ДЛЯ ДНЕЙ И СЕССИЙ ===== */
+.tree-day-header .day-info,
+.tree-session .session-info {
+    display: grid;
+    grid-template-columns: 1.8fr 0.7fr 0.6fr 0.7fr 0.8fr;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+/* ===== ПЕРВАЯ КОЛОНКА (ВЛЕВО) ===== */
+.tree-day-header .day-info .day-date,
+.tree-session .session-info .session-time {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.tree-session .session-info .session-time {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* ===== ВСЕ ОСТАЛЬНЫЕ КОЛОНКИ (ПО ЦЕНТРУ) ===== */
+.tree-day-header .day-info .day-limit,
+.tree-session .session-info .session-limit,
+.tree-day-header .day-info .day-hands,
+.tree-session .session-info .session-hands,
+.tree-day-header .day-info .day-duration,
+.tree-session .session-info .session-duration,
+.tree-day-header .day-info .day-profit,
+.tree-session .session-info .session-profit {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.tree-day-header .day-info .day-hands,
+.tree-session .session-info .session-hands,
+.tree-day-header .day-info .day-duration,
+.tree-session .session-info .session-duration {
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.tree-day-header .day-info .day-limit,
+.tree-session .session-info .session-limit {
+    color: var(--accent);
+}
+
+/* ===== ЦВЕТА ДЛЯ ПРИБЫЛИ ===== */
+.tree-day-header .day-info .day-profit.positive,
+.tree-session .session-info .session-profit.positive {
+    color: var(--success);
+}
+
+.tree-day-header .day-info .day-profit.negative,
+.tree-session .session-info .session-profit.negative {
+    color: var(--danger);
+}
+
+.tree-day-header .day-info .day-profit.zero,
+.tree-session .session-info .session-profit.zero {
+    color: var(--text-muted);
+}
+
+/* ===== ДЕНЬ ===== */
 .tree-day {
     margin-bottom: 4px;
     border-radius: 6px;
@@ -491,41 +549,8 @@ body {
     user-select: none;
 }
 
-/* ===== День при наведении ===== */
 .tree-day-header:hover {
-    background: var(--bg-input);
-    border-radius: 6px;
-}
-
-.tree-day-header .day-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.tree-day-header .day-info .date {
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--text-primary);
-}
-
-.tree-day-header .day-info .profit {
-    font-size: 13px;
-    font-weight: 600;
-    padding: 0 6px;
-}
-
-.tree-day-header .day-info .profit.positive {
-    color: var(--success);
-}
-
-.tree-day-header .day-info .profit.negative {
-    color: var(--danger);
-}
-
-.tree-day-header .day-info .profit.zero {
-    color: var(--text-muted);
+    transform: translateX(6px);
 }
 
 .tree-day-header .toggle-icon {
@@ -538,47 +563,7 @@ body {
     transform: rotate(90deg);
 }
 
-/* ===== Сессии внутри дня ===== */
-.tree-sessions {
-    padding-left: 16px;
-    display: none;
-}
-
-.tree-sessions.open {
-    display: block;
-}
-
-.tree-session {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 12px;
-    margin: 2px 0;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 13px;
-    color: var(--text-secondary);
-}
-
-/* ===== Сессия при наведении ===== */
-.tree-session:hover {
-    background: var(--bg-input);
-    color: var(--text-primary);
-    border-radius: 4px;
-    transform: translateX(4px);
-}
-
-/* ===== Сессия активная (выбранная) ===== */
-.tree-session.active {
-    background: var(--accent);
-    color: white;
-    border-radius: 4px;
-    transform: translateX(4px);
-    box-shadow: 0 2px 10px rgba(108, 92, 231, 0.3);
-}
-
-/* ===== День выбран (все сессии внутри подсвечены) ===== */
+/* ===== ДЕНЬ ВЫБРАН ===== */
 .tree-day.selected > .tree-day-header {
     background: var(--bg-input);
     border-radius: 6px;
@@ -601,49 +586,59 @@ body {
     opacity: 1;
 }
 
-/* ===== Плавные переходы ===== */
-.tree-day-header,
+/* ===== СЕССИИ ===== */
+.tree-sessions {
+    padding-left: 16px;
+    display: none;
+}
+
+.tree-sessions.open {
+    display: block;
+}
+
 .tree-session {
-    transition: all 0.2s ease;
-}
-
-.tree-day-header .toggle-icon {
-    transition: transform 0.3s ease;
-}
-
-.tree-session .session-info {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    padding: 6px 12px;
+    margin: 2px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    color: var(--text-secondary);
 }
 
-.tree-session .session-info .time {
-    font-size: 12px;
+.tree-session:hover {
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border-radius: 4px;
+    transform: translateX(6px);
 }
 
-.tree-session .session-info .profit {
-    font-size: 12px;
-    font-weight: 600;
+.tree-session.active {
+    background: var(--accent);
+    color: white;
+    border-radius: 4px;
+    transform: translateX(4px);
+    box-shadow: 0 2px 10px rgba(108, 92, 231, 0.3);
 }
 
-.tree-session .session-info .profit.positive {
-    color: var(--success);
-}
-
-.tree-session .session-info .profit.negative {
-    color: var(--danger);
-}
-
-.tree-session .session-info .profit.zero {
-    color: var(--text-muted);
-}
-
-.tree-session.active .session-info .profit {
+/* Активная сессия — переопределяем цвета */
+.tree-session.active .session-info .session-time {
     color: white;
 }
 
-/* ===== Пилюли ===== */
+.tree-session.active .session-info .session-profit {
+    color: white;
+}
+
+.tree-session.active .session-info .session-hands,
+.tree-session.active .session-info .session-duration {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* ===== ПИЛЮЛИ ===== */
 .pill {
     display: inline-block;
     padding: 2px 10px;
@@ -669,13 +664,13 @@ body {
 }
 
 .pill.avg-limit {
-    background: var(--accent);
-    color: white;
-    font-weight: 600;
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .pill.avg-limit:hover {
-    background: #7c6ce7;
+    background: var(--accent);
     color: white;
 }
 
@@ -725,13 +720,13 @@ body {
 }
 
 .tree-session .session-info .pill.avg-limit {
-    background: var(--accent);
-    color: white;
-    font-weight: 600;
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .tree-session .session-info .pill.avg-limit:hover {
-    background: #7c6ce7;
+    background: var(--accent);
     color: white;
 }
 
@@ -955,22 +950,22 @@ body {
 }
 
 .copyright-group a {
-    color: var(--text-muted);           /* ← цвет как у текста */
-    text-decoration: none !important;   /* ← убираем подчеркивание */
+    color: var(--text-muted);
+    text-decoration: none !important;
     transition: opacity 0.2s;
 }
 
 .copyright-group a:visited {
-    color: var(--text-muted);           /* ← после посещения тоже как текст */
+    color: var(--text-muted);
 }
 
 .copyright-group a:hover {
     opacity: 1;
-    color: var(--accent);               /* ← при наведении акцентный цвет */
+    color: var(--accent);
 }
 
 .copyright-group a:active {
-    color: var(--text-muted);           /* ← при клике как текст */
+    color: var(--text-muted);
 }
 
 /* ===== Адаптивность ===== */
@@ -1047,6 +1042,18 @@ body {
         align-items: stretch;
         gap: 10px;
     }
+
+    .tree-day-header .day-info,
+    .tree-session .session-info {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 4px;
+    }
+
+    .tree-day-header .day-info .day-date,
+    .tree-session .session-info .session-time {
+        grid-column: 1 / -1;
+        text-align: left;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1075,6 +1082,12 @@ body {
         font-size: 18px;
     }
 
+    .header-logo {
+        height: 28px;
+        width: 28px;
+        margin-right: 6px;
+    }
+
     .player-select {
         min-width: 100px;
         font-size: 12px;
@@ -1095,12 +1108,17 @@ body {
         padding: 6px 10px;
     }
 
-    .tree-day-header .day-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
+    .tree-day-header .day-info,
+    .tree-session .session-info {
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+    }
+
+    .tree-day-header .day-info .day-date,
+    .tree-session .session-info .session-time {
+        grid-column: 1 / -1;
+        text-align: left;
+    }
 
     .tree-session {
         font-size: 12px;
@@ -1120,5 +1138,4 @@ body {
         font-size: 9px;
         padding: 1px 6px;
     }
-
 }
