@@ -899,30 +899,38 @@ if (dropZone) {
 
         // --- Клик по дню ---
         dayHeader.addEventListener('click', (e) => {
-            if (e.target.closest('.pill')) return;
+    if (e.target.closest('.pill')) return;
 
-            const isOpen = sessionsDiv.classList.contains('open');
+    // Убираем выделение со всех дней
+    document.querySelectorAll('.tree-day').forEach(el => el.classList.remove('selected'));
 
-            document.querySelectorAll('.tree-sessions').forEach(el => {
-                if (el !== sessionsDiv) {
-                    el.classList.remove('open');
-                    el.parentElement.querySelector('.toggle-icon')?.classList.remove('open');
-                }
-            });
+    const isOpen = sessionsDiv.classList.contains('open');
 
-            if (isOpen) {
-                sessionsDiv.classList.remove('open');
-                dayHeader.querySelector('.toggle-icon').classList.remove('open');
-                this.showHands(day.hands, `Все раздачи ${dateRange}`);
-            } else {
-                sessionsDiv.classList.add('open');
-                dayHeader.querySelector('.toggle-icon').classList.add('open');
-                document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
-                this.showHands(day.hands, `Все раздачи ${dateRange}`);
-                this.selectedDay = day.date;
-                this.selectedSession = null;
-            }
-        });
+    document.querySelectorAll('.tree-sessions').forEach(el => {
+        if (el !== sessionsDiv) {
+            el.classList.remove('open');
+            el.parentElement.querySelector('.toggle-icon')?.classList.remove('open');
+        }
+    });
+
+    if (isOpen) {
+        sessionsDiv.classList.remove('open');
+        dayHeader.querySelector('.toggle-icon').classList.remove('open');
+        this.showHands(day.hands, `Все раздачи ${dateRange}`);
+        // Убираем выделение с дня, если закрыли
+        dayDiv.classList.remove('selected');
+    } else {
+        sessionsDiv.classList.add('open');
+        dayHeader.querySelector('.toggle-icon').classList.add('open');
+        document.querySelectorAll('.tree-session').forEach(el => el.classList.remove('active'));
+        this.showHands(day.hands, `Все раздачи ${dateRange}`);
+        this.selectedDay = day.date;
+        this.selectedSession = null;
+        
+        // Добавляем выделение дню
+        dayDiv.classList.add('selected');
+    }
+});
 
         dayDiv.appendChild(dayHeader);
         dayDiv.appendChild(sessionsDiv);
