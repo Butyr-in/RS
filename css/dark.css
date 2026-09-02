@@ -1,0 +1,39 @@
+/* ===== Тёмная тема (светлее) ===== */
+:root {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #24243e;
+    --bg-card: #2d2d4e;
+    --bg-input: #24243e;
+    --text-primary: #e8e8e8;
+    --text-secondary: #b0b0c8;
+    --text-muted: #7878a0;
+    --border-color: #3a3a5e;
+    --accent: #6c5ce7;
+    --success: #00d2d3;
+    --danger: #ff6b6b;
+    --warning: #feca57;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #7c6ce7;
+}

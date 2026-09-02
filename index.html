@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Poker Analytics</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dark.css" id="theme-style" />
+</head>
+<body>
+    <div id="app">
+        <!-- ===== ШАПКА ===== -->
+        <header class="header">
+            <div class="header-left">
+                <h1>🃏 Poker Analytics</h1>
+                <span class="version">v1.0</span>
+            </div>
+
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle" title="Сменить тему">🌙</button>
+
+                <select id="playerSelect" class="player-select">
+                    <option value="">Загрузка...</option>
+                </select>
+
+                <div class="limit-filter">
+                    <button class="limit-toggle" id="limitToggle">📊 Лимиты ▼</button>
+                    <div class="limit-dropdown" id="limitDropdown"></div>
+                </div>
+
+                <button class="upload-btn" id="uploadBtn">📁 Выбрать папку</button>
+                <button class="clear-btn" id="clearBtn" title="Очистить все данные">🗑️</button>
+                <button class="refresh-btn" id="refreshBtn" title="Обновить данные">🔄</button>
+                <span id="folderStatus" style="font-size: 12px; color: var(--text-secondary);"></span>
+            </div>
+        </header>
+
+        <!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
+        <main class="main">
+            <!-- Карточки -->
+            <section class="cards-section">
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-value" id="totalHands">0</div>
+                        <div class="card-label">Всего рук</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-value" id="totalTime">0ч 0м</div>
+                        <div class="card-label">Время</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-value" id="bb100">0.0</div>
+                        <div class="card-label">BB/100</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-value" id="totalProfit">€0.00</div>
+                        <div class="card-label">Результат</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- График на всю ширину -->
+            <section class="chart-full-section">
+                <div class="chart-full-container">
+                    <div class="chart-controls">
+                        <button class="chart-btn active" data-view="hands">Раздачи</button>
+                        <button class="chart-btn" data-view="days">Дни</button>
+                        <button class="chart-btn" data-view="months">Месяцы</button>
+                        <button class="chart-btn" data-view="years">Годы</button>
+                        <button class="chart-btn" data-view="all">Всё время</button>
+                    </div>
+                    <canvas id="capitalChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Топ оппонентов -->
+            <section class="opponents-section">
+                <h3>👥 Топ оппонентов (проиграно hero)</h3>
+                <div class="opponents-list" id="opponentsList">
+                    <p class="empty-message">Нет данных</p>
+                </div>
+            </section>
+
+            <!-- ===== ДВЕ ПАНЕЛИ: СЕССИИ и РАЗДАЧИ ===== -->
+            <section class="hands-section">
+                <div class="hands-layout">
+                    <!-- ЛЕВАЯ ПАНЕЛЬ: Сессии -->
+                    <div class="hands-tree-panel">
+                        <div class="panel-header">
+                            <h3>📅 Сессии</h3>
+                            <span class="panel-count" id="totalDaysCount">0 дней</span>
+                        </div>
+                        <div class="panel-body" id="daysTree">
+                            <p class="empty-message">Нет раздач</p>
+                        </div>
+                    </div>
+
+                    <!-- ПРАВАЯ ПАНЕЛЬ: Раздачи -->
+                    <div class="hands-list-panel">
+                        <div class="panel-header">
+                            <h3 id="handsPanelTitle">📋 Раздачи</h3>
+                            <span class="panel-count" id="handsCount">0 раздач</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="table-wrapper">
+                                <table class="hands-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Время</th>
+                                            <th>Лимит</th>
+                                            <th>Оппоненты</th>
+                                            <th>Результат</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="handsBody">
+                                        <tr>
+                                            <td colspan="4" class="empty-message">Выберите день или сессию</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ===== МОДАЛЬНОЕ ОКНО ЗАГРУЗКИ ===== -->
+        <div class="modal" id="uploadModal">
+            <div class="modal-content">
+                <h2>📁 Выбор папки с раздачами</h2>
+
+                <div class="browser-warning" id="browserWarning" style="display: none; padding: 10px; border-radius: 8px; background: #ff6b6b; color: white; margin-bottom: 12px;">
+                    ⚠️ Ваш браузер не поддерживает выбор папок.<br>
+                    Используйте Chrome, Edge или Opera последней версии.
+                </div>
+
+                <div class="drop-zone" id="dropZone">
+    <p>📂 Нажмите, чтобы выбрать ПАПКУ</p>
+    <p class="drop-hint">или перетащите .txt ФАЙЛЫ сюда</p>
+    <div style="margin-top: 12px; display: flex; gap: 20px; justify-content: center; font-size: 12px; color: var(--text-muted);">
+        <span>📁 Нажмите → выбор папки</span>
+        <span>📄 Перетащите → загрузка файлов</span>
+    </div>
+</div>
+
+                <div id="selectedFolder" style="display: none; margin: 12px 0; padding: 10px; border-radius: 8px; background: var(--bg-secondary);">
+                    <span id="folderPath"></span>
+                    <span id="fileCount" style="margin-left: 12px; font-size: 13px; color: var(--text-secondary);"></span>
+                </div>
+
+                <div class="file-list" id="fileList"></div>
+
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-close" id="closeModal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ПАРАМЕТРЫ ===== -->
+        <div class="settings-bar">
+            <div class="settings-group">
+                <label>Начало дня:</label>
+                <input type="time" id="dayStart" value="06:00" step="60">
+            </div>
+            <div class="settings-group">
+                <label>Разрыв сессий (мин):</label>
+                <input type="number" id="sessionGap" value="30" min="1" max="120" style="width: 60px;">
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/parser.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

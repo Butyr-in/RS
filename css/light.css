@@ -1,0 +1,33 @@
+/* ===== Светлая тема ===== */
+[data-theme="light"] {
+    --bg-primary: #f0f2f5;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-input: #f0f2f5;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a5e;
+    --text-muted: #8a8a9e;
+    --border-color: #d0d0d8;
+    --accent: #6c5ce7;
+    --success: #00b894;
+    --danger: #ff7675;
+    --warning: #fdcb6e;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .card:hover {
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .hands-table tr:hover td {
+    background: #f8f9fa;
+}
+
+[data-theme="light"] .modal {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .drop-zone:hover,
+[data-theme="light"] .drop-zone.dragover {
+    background: #f8f9fa;
+}
