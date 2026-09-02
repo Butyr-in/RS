@@ -914,7 +914,7 @@ body {
 
 .copyright-group a {
     color: var(--text-muted);
-    text-decoration: none;
+    text-decoration: none;          /* убираем подчеркивание */
     transition: opacity 0.2s;
 }
 
