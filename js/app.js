@@ -37,11 +37,11 @@ const App = {
     this.updateDashboard();
 
     // ===== КОПИРАЙТ =====
-    const year = new Date().getFullYear();
-    const el = document.getElementById('copyright');
-    if (el) {
-        el.textContent = `© Butyrin ${year}`;
-    }
+const year = new Date().getFullYear();
+const el = document.getElementById('copyright');
+if (el) {
+    el.textContent = `© Butyrin ${year}`;
+}
 
     console.log('✅ Приложение готово');
 },
