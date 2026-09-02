@@ -36,7 +36,14 @@ const App = {
         Charts.init();
         this.updateDashboard();
 
-        console.log('✅ Приложение готово');
+        // ===== КОПИРАЙТ В ФУТЕРЕ =====
+    const year = new Date().getFullYear();
+    const el = document.getElementById('copyright');
+    if (el) {
+        el.textContent = `© Butyrin ${year}`;
+    }
+
+    console.log('✅ Приложение готово');
     },
 
     async loadData() {
