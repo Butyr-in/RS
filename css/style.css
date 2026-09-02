@@ -495,7 +495,6 @@ body {
 .tree-day-header:hover {
     background: var(--bg-input);
     border-radius: 6px;
-    box-shadow: 0 0 0 2px var(--accent);
 }
 
 .tree-day-header .day-info {
